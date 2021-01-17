@@ -3,7 +3,6 @@
 
 #include <QAbstractTableModel>
 #include <QObject>
-#include <QDebug>
 #include "task.h"
 
 class TaskModel : public QAbstractTableModel

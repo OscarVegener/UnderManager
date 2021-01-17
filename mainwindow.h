@@ -8,10 +8,13 @@
 #include <QVector>
 #include <QFile>
 #include <QFileDialog>
-#include <QDebug>
+#include <QMenu>
 #include "datedialog.h"
 #include "taskmodel.h"
 #include "taskfiltermodel.h"
+#include "aboutdialog.h"
+
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +27,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    void closeEvent(QCloseEvent *event) override;
 
 public slots:
     void setDate(const QDate& date);
@@ -40,12 +45,16 @@ private:
     QString filename = "tasks.dat";
 
     void addNewTask();
-
     void finishTask();
 
     void save(const QString &path);
-
     void load(const QString &path);
+
+    void exit();
+
+    QMenu *contextMenu;
+    QAction *deleteAction;
+    void initContextMenu();
 
 signals:
     void selectedDateChanged();
@@ -57,5 +66,9 @@ private slots:
     void on_pushButton_clicked();
     void on_actionLoad_triggered();
     void on_actionSave_as_triggered();
+    void on_actionExit_triggered();
+    void on_actionAbout_triggered();
+    void on_tableView_customContextMenuRequested(const QPoint &pos);
+    void deleteTask();
 };
 #endif // MAINWINDOW_H

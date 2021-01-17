@@ -22,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stopButton->setHidden(true);
 
     load(filename);
+
+    initContextMenu();
 }
 
 MainWindow::~MainWindow()
@@ -29,10 +31,24 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    exit();
+    QMainWindow::closeEvent(event);
+}
+
 void MainWindow::setDate(const QDate &date){
     selectedDate = date;
     ui->dateEdit->setDate(date);
     filterModel->setDate(date);
+}
+
+void MainWindow::initContextMenu()
+{
+    contextMenu = new QMenu(this);
+    deleteAction = new QAction(tr("&Delete"), contextMenu);
+    connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteTask);
+    contextMenu->addAction(deleteAction);
 }
 
 void MainWindow::addNewTask()
@@ -74,6 +90,20 @@ void MainWindow::load(const QString &path)
     }
 }
 
+void MainWindow::exit()
+{
+    if (!model->data(model->index(0, 3), Qt::DisplayRole).toDateTime().isValid()){
+        finishTask();
+    }
+}
+
+void MainWindow::deleteTask()
+{
+    QModelIndex index = ui->tableView->selectionModel()->selectedIndexes().first();
+    filterModel->removeRows(index.row(), 1, QModelIndex());
+    save(filename);
+}
+
 void MainWindow::updateTimer()
 {
     ui->timeEdit->setTime(ui->timeEdit->time().addMSecs(1000));
@@ -102,6 +132,7 @@ void MainWindow::on_pushButton_clicked()
 {
     DateDialog dlg(selectedDate, this);
     dlg.setModal(true);
+    dlg.setWindowFlags(dlg.windowFlags() & ~Qt::WindowContextHelpButtonHint);
     connect(&dlg, &DateDialog::dateChanged, this, &MainWindow::setDate);
     dlg.exec();
 }
@@ -116,4 +147,27 @@ void MainWindow::on_actionSave_as_triggered()
 {
     QString filename = QFileDialog::getSaveFileName(this, tr("Save tasks"), QDir::currentPath());
     save(filename);
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    exit();
+    QApplication::exit(0);
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    AboutDialog dlg(this);
+    dlg.setModal(true);
+    dlg.setWindowFlags(dlg.windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
+    dlg.setWindowFlags(dlg.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    dlg.exec();
+}
+
+void MainWindow::on_tableView_customContextMenuRequested(const QPoint &pos)
+{
+    QModelIndex index = ui->tableView->indexAt(pos);
+    if (index.isValid() && filterModel->data(filterModel->index(index.row(), 3), Qt::DisplayRole).toDateTime().isValid()){
+        contextMenu->popup(ui->tableView->viewport()->mapToGlobal(pos));
+    }
 }
