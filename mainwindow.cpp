@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->timeEdit->setTime(time);
     ui->tableView->setModel(filterModel);
     ui->stopButton->setHidden(true);
+
+    load(filename);
 }
 
 MainWindow::~MainWindow()
@@ -48,6 +50,28 @@ void MainWindow::finishTask()
     QTime time(0, 0);
     time = time.addSecs(secs);
     model->setData(model->index(0, 4), time);
+    save(filename);
+}
+
+void MainWindow::save(const QString &path)
+{
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly)){
+        QDataStream out(&file);
+        out << tasks;
+        file.close();
+    }
+}
+
+void MainWindow::load(const QString &path)
+{
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly)){
+        QDataStream in(&file);
+        in >> tasks;
+        file.close();
+        filterModel->invalidate();
+    }
 }
 
 void MainWindow::updateTimer()
@@ -80,4 +104,16 @@ void MainWindow::on_pushButton_clicked()
     dlg.setModal(true);
     connect(&dlg, &DateDialog::dateChanged, this, &MainWindow::setDate);
     dlg.exec();
+}
+
+void MainWindow::on_actionLoad_triggered()
+{
+    filename = QFileDialog::getOpenFileName(this, tr("Open tasks"), QDir::currentPath());
+    load(filename);
+}
+
+void MainWindow::on_actionSave_as_triggered()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save tasks"), QDir::currentPath());
+    save(filename);
 }

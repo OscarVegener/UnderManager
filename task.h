@@ -47,4 +47,30 @@ private:
 
 };
 
+inline QDataStream &operator<<(QDataStream &out, const Task &task){
+    out << task.getCaption();
+    out << task.getStatus();
+    out << task.getDateStarted();
+    out << task.getDateFinished();
+    out << task.getTimeElapsed();
+    return out;
+}
+
+inline QDataStream &operator>>(QDataStream &in, Task &task){
+    QString tempString;
+    in >> tempString;
+    task.setCaption(tempString);
+    in >> tempString;
+    task.setStatus(tempString);
+    QDateTime tempDate;
+    in >> tempDate;
+    task.setDateStarted(tempDate);
+    in >> tempDate;
+    task.setDateFinished(tempDate);
+    QTime tempTime;
+    in >> tempTime;
+    task.setTimeElapsed(tempTime);
+    return in;
+}
+
 #endif // TASK_H

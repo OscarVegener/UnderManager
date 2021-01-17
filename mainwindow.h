@@ -6,6 +6,8 @@
 #include <QTime>
 #include <QDate>
 #include <QVector>
+#include <QFile>
+#include <QFileDialog>
 #include <QDebug>
 #include "datedialog.h"
 #include "taskmodel.h"
@@ -35,9 +37,15 @@ private:
 
     QVector<Task> tasks;
 
+    QString filename = "tasks.dat";
+
     void addNewTask();
 
     void finishTask();
+
+    void save(const QString &path);
+
+    void load(const QString &path);
 
 signals:
     void selectedDateChanged();
@@ -47,5 +55,7 @@ private slots:
     void on_startButton_clicked();
     void on_stopButton_clicked();
     void on_pushButton_clicked();
+    void on_actionLoad_triggered();
+    void on_actionSave_as_triggered();
 };
 #endif // MAINWINDOW_H
