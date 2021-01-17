@@ -1,11 +1,13 @@
 #include "datedialog.h"
 #include "ui_datedialog.h"
 
-DateDialog::DateDialog(QWidget *parent) :
+DateDialog::DateDialog(const QDate &selectedDate, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DateDialog)
 {
     ui->setupUi(this);
+    ui->calendarWidget->setSelectedDate(selectedDate);
+    ui->calendarWidget->setMaximumDate(QDate::currentDate());
 }
 
 DateDialog::~DateDialog()

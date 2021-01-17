@@ -9,6 +9,7 @@
 #include <QDebug>
 #include "datedialog.h"
 #include "taskmodel.h"
+#include "taskfiltermodel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -25,12 +26,12 @@ public:
 public slots:
     void setDate(const QDate& date);
 
-
 private:
     Ui::MainWindow *ui;
     QTimer *taskTimer;
     QDate selectedDate;
     TaskModel *model;
+    TaskFilterModel *filterModel;
 
     QVector<Task> tasks;
 

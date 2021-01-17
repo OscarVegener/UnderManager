@@ -12,7 +12,7 @@ class DateDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit DateDialog(QWidget *parent = nullptr);
+    explicit DateDialog(const QDate &selectedDate, QWidget *parent = nullptr);
     ~DateDialog();
 
 private:

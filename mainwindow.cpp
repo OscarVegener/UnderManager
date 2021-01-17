@@ -11,9 +11,15 @@ MainWindow::MainWindow(QWidget *parent)
     taskTimer->setInterval(1000);
     connect(taskTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
 
+    model = new TaskModel(&tasks, this);
+    filterModel = new TaskFilterModel(this);
+    filterModel->setSourceModel(model);
     setDate(QDate::currentDate());
-    model = new TaskModel(&tasks);
-    ui->tableView->setModel(model);
+
+    QTime time(0, 0);
+    ui->timeEdit->setTime(time);
+    ui->tableView->setModel(filterModel);
+    ui->stopButton->setHidden(true);
 }
 
 MainWindow::~MainWindow()
@@ -24,7 +30,7 @@ MainWindow::~MainWindow()
 void MainWindow::setDate(const QDate &date){
     selectedDate = date;
     ui->dateEdit->setDate(date);
-    emit selectedDateChanged();
+    filterModel->setDate(date);
 }
 
 void MainWindow::addNewTask()
@@ -53,20 +59,24 @@ void MainWindow::updateTimer()
 void MainWindow::on_startButton_clicked()
 {
     taskTimer->start();
-    QTime time(0, 0);
-    ui->timeEdit->setTime(time);
     addNewTask();
+    ui->startButton->setHidden(true);
+    ui->stopButton->setHidden(false);
 }
 
 void MainWindow::on_stopButton_clicked()
 {
     taskTimer->stop();
     finishTask();
+    QTime time(0, 0);
+    ui->timeEdit->setTime(time);
+    ui->stopButton->setHidden(true);
+    ui->startButton->setHidden(false);
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    DateDialog dlg(this);
+    DateDialog dlg(selectedDate, this);
     dlg.setModal(true);
     connect(&dlg, &DateDialog::dateChanged, this, &MainWindow::setDate);
     dlg.exec();
