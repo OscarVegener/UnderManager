@@ -27,6 +27,9 @@ public:
 
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
 
+public slots:
+    void addTask(const Task &task);
+
 private:
     QVector<Task> *vec;
     QDateTime selectedDate;

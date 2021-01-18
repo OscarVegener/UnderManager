@@ -9,10 +9,12 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMenu>
+#include <QClipboard>
 #include "datedialog.h"
 #include "taskmodel.h"
 #include "taskfiltermodel.h"
 #include "aboutdialog.h"
+#include "newtaskdialog.h"
 
 #include <QDebug>
 
@@ -54,7 +56,11 @@ private:
 
     QMenu *contextMenu;
     QAction *deleteAction;
+    QAction *copyAction;
+    QAction *newTaskAction;
     void initContextMenu();
+
+    QClipboard *clipBoard;
 
 signals:
     void selectedDateChanged();
@@ -69,6 +75,8 @@ private slots:
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
     void on_tableView_customContextMenuRequested(const QPoint &pos);
-    void deleteTask();
+    void deleteItem();
+    void copyItem();
+    void newItem();
 };
 #endif // MAINWINDOW_H

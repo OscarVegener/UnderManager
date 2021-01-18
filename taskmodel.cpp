@@ -14,7 +14,7 @@ int TaskModel::rowCount(const QModelIndex &parent) const
 int TaskModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return 5;
+    return 6;
 }
 
 QVariant TaskModel::data(const QModelIndex &index, int role) const
@@ -35,10 +35,28 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
         return vec->at(index.row()).getDateStarted();
     }
     if (role == Qt::DisplayRole && index.column() == 3){
-        return vec->at(index.row()).getDateFinished();
+        if (vec->at(index.row()).isFinished()){
+            return vec->at(index.row()).getDateFinished();
+        }
+        else{
+            return QVariant();
+        }
     }
     if (role == Qt::DisplayRole && index.column() == 4){
-        return vec->at(index.row()).getTimeElapsed().toString();
+        if (vec->at(index.row()).isFinished()){
+            return vec->at(index.row()).getTimeElapsed().toString();
+        }
+        else{
+            return QVariant();
+        }
+    }
+    if (role == Qt::DisplayRole && index.column() == 5){
+        if (vec->at(index.row()).isFinished()){
+            return vec->at(index.row()).getDaysElapsed();
+        }
+        else{
+            return QVariant();
+        }
     }
     else{
         return QVariant();
@@ -64,6 +82,9 @@ QVariant TaskModel::headerData(int section, Qt::Orientation orientation, int rol
     }
     if (orientation == Qt::Horizontal && section == 4){
         return QString("Time elapsed");
+    }
+    if (orientation == Qt::Horizontal && section == 5){
+        return QString("Days elapsed");
     }
     return QVariant();
 }
@@ -99,11 +120,16 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
         }
         if (index.column() == 3){
             (*vec)[index.row()].setDateFinished(value.toDateTime());
-            emit dataChanged(index, index, {role});
+            emit dataChanged(index, this->index(index.row(), 5), {role});
             return true;
         }
         if (index.column() == 4){
             (*vec)[index.row()].setTimeElapsed(value.toTime());
+            emit dataChanged(index, index, {role});
+            return true;
+        }
+        if (index.column() == 5){
+            (*vec)[index.row()].setDaysElapsed(value.toULongLong());
             emit dataChanged(index, index, {role});
             return true;
         }
@@ -131,4 +157,18 @@ bool TaskModel::removeRows(int position, int rows, const QModelIndex &index)
     }
     endRemoveRows();
     return true;
+}
+
+void TaskModel::addTask(const Task &task)
+{
+    if (vec->at(0).isFinished()){
+        beginInsertRows(QModelIndex(), 0, 0);
+        vec->insert(0, task);
+        endInsertRows();
+    }
+    else{
+        beginInsertRows(QModelIndex(), 1, 1);
+        vec->insert(1, task);
+        endInsertRows();
+    }
 }

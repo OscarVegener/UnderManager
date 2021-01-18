@@ -15,9 +15,11 @@ public:
                   const QDateTime &dateStarted,
                   const QDateTime &dateFinished,
                   const QTime &timeElapsed,
+                  const quint64 &daysElapsed,
+                  const bool &finished = true,
                   QObject *parent = nullptr);
 
-    Task(const Task &other);
+    explicit Task(const Task &other);
 
     QString getCaption() const;
     void setCaption(const QString &value);
@@ -29,10 +31,16 @@ public:
     void setDateStarted(const QDateTime &value);
 
     QDateTime getDateFinished() const;
-    void setDateFinished(const QDateTime &value);
+    void setDateFinished(const QDateTime &value, bool update = true);
 
     QTime getTimeElapsed() const;
     void setTimeElapsed(const QTime &value);
+
+    quint64 getDaysElapsed() const;
+    void setDaysElapsed(const quint64 &value);
+
+    bool isFinished() const;
+    void setFinished(const bool &value);
 
     Task &operator=(const Task &);
 
@@ -44,6 +52,10 @@ private:
     QDateTime dateStarted;
     QDateTime dateFinished;
     QTime timeElapsed;
+    quint64 daysElapsed;
+    bool finished = false;
+
+    void updateTimeDaysElapsed();
 
 };
 
@@ -53,6 +65,13 @@ inline QDataStream &operator<<(QDataStream &out, const Task &task){
     out << task.getDateStarted();
     out << task.getDateFinished();
     out << task.getTimeElapsed();
+    out << QString::number(task.getDaysElapsed());
+    if (task.isFinished()){
+        out << QString("True");
+    }
+    else{
+        out << QString("False");
+    }
     return out;
 }
 
@@ -66,10 +85,19 @@ inline QDataStream &operator>>(QDataStream &in, Task &task){
     in >> tempDate;
     task.setDateStarted(tempDate);
     in >> tempDate;
-    task.setDateFinished(tempDate);
+    task.setDateFinished(tempDate, false);
     QTime tempTime;
     in >> tempTime;
     task.setTimeElapsed(tempTime);
+    in >> tempString;
+    task.setDaysElapsed(tempString.toULongLong());
+    in >> tempString;
+    if (tempString == "True"){
+        task.setFinished(true);
+    }
+    else{
+        task.setFinished(false);
+    }
     return in;
 }
 
