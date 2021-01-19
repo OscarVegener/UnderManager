@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // construct objects
     taskTimer = new QTimer(this);
     taskTimer->setInterval(1000);
     connect(taskTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
@@ -16,18 +17,34 @@ MainWindow::MainWindow(QWidget *parent)
     filterModel->setSourceModel(model);
     setDate(QDate::currentDate());
 
+    settings = new QSettings(QSettings::IniFormat,
+                             QSettings::UserScope,
+                             QCoreApplication::organizationName(),
+                             QCoreApplication::applicationName(),
+                             this);
+
+    //set up ui
     QTime time(0, 0);
     ui->timeEdit->setTime(time);
     ui->tableView->setModel(filterModel);
     ui->stopButton->setHidden(true);
     ui->label->setHidden(true);
     ui->lineEdit->setHidden(true);
-
-    load(filename);
+    ui->lineEdit->setText("0");
+    ui->tableView->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     initContextMenu();
 
     clipBoard = QGuiApplication::clipboard();
+
+    readSettings();
+
+    load(filename);
 }
 
 MainWindow::~MainWindow()
@@ -59,6 +76,61 @@ void MainWindow::initContextMenu()
     newTaskAction = new QAction(tr("&New task..."), contextMenu);
     connect(newTaskAction, &QAction::triggered, this, &MainWindow::newItem);
     contextMenu->addAction(newTaskAction);
+}
+
+void MainWindow::writeSettings()
+{
+    settings->beginGroup("MainWindow");
+    settings->setValue("size", size());
+    settings->setValue("pos", pos());
+    if (windowState().testFlag(Qt::WindowMaximized)){
+        settings->setValue("fullscreenState", true);
+    }
+    else{
+        settings->setValue("fullscreenState", false);
+    }
+    settings->endGroup();
+    settings->beginGroup("General");
+    settings->setValue("timeElapsed", ui->timeEdit->time());
+    settings->setValue("daysElapsed", ui->lineEdit->text());
+    settings->endGroup();
+}
+
+void MainWindow::writeDefaultSettings()
+{
+    settings->beginGroup("MainWindow");
+    settings->setValue("size", size());
+    settings->setValue("pos", pos());
+    if (windowState().testFlag(Qt::WindowMaximized)){
+        settings->setValue("fullscreenState", true);
+    }
+    else{
+        settings->setValue("fullscreenState", false);
+    }
+    settings->endGroup();
+    settings->beginGroup("General");
+    settings->setValue("timeElapsed", ui->timeEdit->time());
+    settings->setValue("daysElapsed", ui->lineEdit->text());
+    settings->setValue("autoFinishTask", true);
+    settings->endGroup();
+}
+
+void MainWindow::readSettings()
+{
+    if (QFile::exists(settings->fileName())){
+        settings->beginGroup("MainWindow");
+        resize(settings->value("size", QSize(400, 400)).toSize());
+        move(settings->value("pos", QPoint(200, 200)).toPoint());
+        if (settings->value("fullscreenState").toBool()){
+            setWindowState(windowState().setFlag(Qt::WindowMaximized, true));
+        }
+        settings->endGroup();
+        settings->beginGroup("General");
+        settings->endGroup();
+    }
+    else{
+        writeDefaultSettings();
+    }
 }
 
 void MainWindow::addNewTask()
@@ -93,13 +165,54 @@ void MainWindow::load(const QString &path)
         in >> tasks;
         file.close();
         filterModel->invalidate();
+        if (tasks.size() != 0 && !tasks.at(0).isFinished()){
+            loadUnfinishedTask();
+        }
+    }   
+}
+
+void MainWindow::loadUnfinishedTask()
+{
+    if (settings->contains("General/timeElapsed") && settings->contains("General/daysElapsed")){
+        ui->startButton->setHidden(true);
+        ui->stopButton->setHidden(false);
+        ui->timeEdit->setTime(settings->value("General/timeElapsed").toTime());
+        if (quint64 days = settings->value("General/daysElapsed").toULongLong() > 0){
+            ui->lineEdit->setHidden(false);
+            ui->lineEdit->setText(QString::number(days));
+        }
+        taskTimer->start();
     }
+    else{
+        QMessageBox *msg = new QMessageBox(this);
+        msg->setModal(true);
+        msg->setIcon(QMessageBox::Warning);
+        msg->setText("Can't load unfinished task. Last task has been deleted.");
+        msg->setStandardButtons(QMessageBox::Ok);
+        msg->exec();
+        delete msg;
+        deleteUnfinishedTask();
+    }
+}
+
+void MainWindow::deleteUnfinishedTask()
+{
+    tasks.removeAt(0);
+    filterModel->invalidate();
 }
 
 void MainWindow::exit()
 {
-    if (!filterModel->data(filterModel->index(0, 3), Qt::DisplayRole).toDateTime().isValid()){
-        finishTask();
+    if (settings->value("General/autoFinishTask").toBool()){
+        if (!filterModel->data(filterModel->index(0, 3), Qt::DisplayRole).toDateTime().isValid()){
+            finishTask();
+        }
+    }
+    if (QFile::exists(settings->fileName())){
+        writeSettings();
+    }
+    else{
+        writeDefaultSettings();
     }
     save(filename);
 }
@@ -159,6 +272,7 @@ void MainWindow::on_stopButton_clicked()
     ui->startButton->setHidden(false);
     ui->label->setHidden(true);
     ui->lineEdit->setHidden(true);
+    ui->lineEdit->setText("0");
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -218,4 +332,13 @@ void MainWindow::on_tableView_customContextMenuRequested(const QPoint &pos)
         copyAction->setEnabled(false);
     }
     contextMenu->popup(ui->tableView->viewport()->mapToGlobal(pos));
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    Preferences dlg(settings, this);
+    dlg.setModal(true);
+    dlg.setWindowFlags(dlg.windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
+    dlg.setWindowFlags(dlg.windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    dlg.exec();
 }

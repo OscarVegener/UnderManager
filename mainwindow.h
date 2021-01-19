@@ -10,11 +10,14 @@
 #include <QFileDialog>
 #include <QMenu>
 #include <QClipboard>
+#include <QSettings>
+#include <QMessageBox>
 #include "datedialog.h"
 #include "taskmodel.h"
 #include "taskfiltermodel.h"
 #include "aboutdialog.h"
 #include "newtaskdialog.h"
+#include "preferences.h"
 
 #include <QDebug>
 
@@ -51,6 +54,8 @@ private:
 
     void save(const QString &path);
     void load(const QString &path);
+    void loadUnfinishedTask();
+    void deleteUnfinishedTask();
 
     void exit();
 
@@ -61,6 +66,11 @@ private:
     void initContextMenu();
 
     QClipboard *clipBoard;
+
+    QSettings *settings;
+    void writeSettings();
+    void writeDefaultSettings();
+    void readSettings();
 
 signals:
     void selectedDateChanged();
@@ -78,5 +88,7 @@ private slots:
     void deleteItem();
     void copyItem();
     void newItem();
+    void on_actionPreferences_triggered();
 };
+
 #endif // MAINWINDOW_H
