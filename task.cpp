@@ -119,17 +119,3 @@ void Task::setFinished(const bool &value)
 {
     finished = value;
 }
-
-//void Task::updateTimeDaysElapsed()
-//{
-//    if (dateFinished > dateStarted){
-//        QTime time(0, 0);
-//        time = time.addSecs(getDateStarted().secsTo(getDateFinished()));
-//        setTimeElapsed(time);
-//        setDaysElapsed(getDateStarted().daysTo(getDateFinished()));
-//    }
-//    else{
-//        setTimeElapsed(QTime(0, 0));
-//        setDaysElapsed(0);
-//    }
-//}

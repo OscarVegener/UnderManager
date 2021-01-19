@@ -8,6 +8,7 @@ DateDialog::DateDialog(const QDate &selectedDate, QWidget *parent) :
     ui->setupUi(this);
     ui->calendarWidget->setSelectedDate(selectedDate);
     ui->calendarWidget->setMaximumDate(QDate::currentDate());
+    ui->calendarWidget->setMinimumDate(QDate(1980, 1, 1));
 }
 
 DateDialog::~DateDialog()

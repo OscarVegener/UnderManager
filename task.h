@@ -55,8 +55,6 @@ private:
     quint64 daysElapsed;
     bool finished = false;
 
-    //void updateTimeDaysElapsed();
-
 };
 
 inline QDataStream &operator<<(QDataStream &out, const Task &task){

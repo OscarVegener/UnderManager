@@ -135,17 +135,19 @@ void MainWindow::readSettings()
 
 void MainWindow::addNewTask()
 {
-    filterModel->insertRows(0, 1);
-    filterModel->setData(filterModel->index(0, 0), "Unnamed task");
-    filterModel->setData(filterModel->index(0, 1), "Unknown status");
-    filterModel->setData(filterModel->index(0, 2), QDateTime::currentDateTime());
+    tasks.push_front(Task());
+    tasks[0].setCaption("Unnamed task");
+    tasks[0].setStatus("Unknown status");
+    tasks[0].setDateStarted(QDateTime::currentDateTime());
+    filterModel->invalidate();
 }
 
 void MainWindow::finishTask()
 {
-    filterModel->setData(filterModel->index(0, 3), QDateTime::currentDateTime());
-    filterModel->setData(filterModel->index(0, 4), ui->timeEdit->time());
-    filterModel->setData(filterModel->index(0, 5), ui->lineEdit->text());
+    tasks[0].setDateFinished(QDateTime::currentDateTime());
+    tasks[0].setTimeElapsed(ui->timeEdit->time());
+    tasks[0].setDaysElapsed(ui->lineEdit->text().toULongLong());
+    filterModel->invalidate();
     save(filename);
 }
 
