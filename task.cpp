@@ -69,12 +69,9 @@ QDateTime Task::getDateFinished() const
     return dateFinished;
 }
 
-void Task::setDateFinished(const QDateTime &value, bool update)
+void Task::setDateFinished(const QDateTime &value)
 {
     dateFinished = value;
-    if (update){
-        updateTimeDaysElapsed();
-    }
     finished = true;
 }
 
@@ -123,16 +120,16 @@ void Task::setFinished(const bool &value)
     finished = value;
 }
 
-void Task::updateTimeDaysElapsed()
-{
-    if (dateFinished > dateStarted){
-        QTime time(0, 0);
-        time = time.addSecs(getDateStarted().secsTo(getDateFinished()));
-        setTimeElapsed(time);
-        setDaysElapsed(getDateStarted().daysTo(getDateFinished()));
-    }
-    else{
-        setTimeElapsed(QTime(0, 0));
-        setDaysElapsed(0);
-    }
-}
+//void Task::updateTimeDaysElapsed()
+//{
+//    if (dateFinished > dateStarted){
+//        QTime time(0, 0);
+//        time = time.addSecs(getDateStarted().secsTo(getDateFinished()));
+//        setTimeElapsed(time);
+//        setDaysElapsed(getDateStarted().daysTo(getDateFinished()));
+//    }
+//    else{
+//        setTimeElapsed(QTime(0, 0));
+//        setDaysElapsed(0);
+//    }
+//}

@@ -144,6 +144,8 @@ void MainWindow::addNewTask()
 void MainWindow::finishTask()
 {
     filterModel->setData(filterModel->index(0, 3), QDateTime::currentDateTime());
+    filterModel->setData(filterModel->index(0, 4), ui->timeEdit->time());
+    filterModel->setData(filterModel->index(0, 5), ui->lineEdit->text());
     save(filename);
 }
 

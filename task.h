@@ -31,7 +31,7 @@ public:
     void setDateStarted(const QDateTime &value);
 
     QDateTime getDateFinished() const;
-    void setDateFinished(const QDateTime &value, bool update = true);
+    void setDateFinished(const QDateTime &value);
 
     QTime getTimeElapsed() const;
     void setTimeElapsed(const QTime &value);
@@ -55,7 +55,7 @@ private:
     quint64 daysElapsed;
     bool finished = false;
 
-    void updateTimeDaysElapsed();
+    //void updateTimeDaysElapsed();
 
 };
 
@@ -85,7 +85,7 @@ inline QDataStream &operator>>(QDataStream &in, Task &task){
     in >> tempDate;
     task.setDateStarted(tempDate);
     in >> tempDate;
-    task.setDateFinished(tempDate, false);
+    task.setDateFinished(tempDate);
     QTime tempTime;
     in >> tempTime;
     task.setTimeElapsed(tempTime);
