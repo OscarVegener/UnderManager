@@ -17,7 +17,8 @@ SOURCES += \
     preferences.cpp \
     task.cpp \
     taskfiltermodel.cpp \
-    taskmodel.cpp
+    taskmodel.cpp \
+    updatetodaytimeworker.cpp
 
 HEADERS += \
     aboutdialog.h \
@@ -27,7 +28,8 @@ HEADERS += \
     preferences.h \
     task.h \
     taskfiltermodel.h \
-    taskmodel.h
+    taskmodel.h \
+    updatetodaytimeworker.h
 
 FORMS += \
     aboutdialog.ui \

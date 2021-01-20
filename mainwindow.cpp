@@ -23,6 +23,14 @@ MainWindow::MainWindow(QWidget *parent)
                              QCoreApplication::applicationName(),
                              this);
 
+    //set up another thread to calculate total time elapsed today
+    worker = new UpdateTodayTimeWorker(&tasks);
+    worker->moveToThread(&workerThread);
+    connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(this, &MainWindow::updateTodayTimeElapsedNeeded, worker, &UpdateTodayTimeWorker::calculateTodayTime);
+    connect(worker, &UpdateTodayTimeWorker::timeCalculated, this, &MainWindow::setTodayTimeElapsed);
+    workerThread.start();
+
     //set up ui
     QTime time(0, 0);
     ui->timeEdit->setTime(time);
@@ -49,6 +57,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    workerThread.quit();
+    workerThread.wait();
     delete ui;
 }
 
@@ -165,6 +175,7 @@ void MainWindow::load(const QString &path)
 {
     QFile file(path);
     if (file.open(QIODevice::ReadOnly)){
+        QMutexLocker locker(&tasksMutex);
         QDataStream in(&file);
         in >> tasks;
         file.close();
@@ -172,6 +183,7 @@ void MainWindow::load(const QString &path)
         if (tasks.size() != 0 && !tasks.at(0).isFinished()){
             loadUnfinishedTask();
         }
+        emit updateTodayTimeElapsedNeeded();
     }   
 }
 
@@ -226,6 +238,7 @@ void MainWindow::deleteItem()
     QModelIndex index = ui->tableView->selectionModel()->selectedIndexes().first();
     filterModel->removeRows(index.row(), 1, QModelIndex());
     save(filename);
+    emit updateTodayTimeElapsedNeeded();
 }
 
 void MainWindow::copyItem()
@@ -243,6 +256,7 @@ void MainWindow::newItem()
     dlg.setWindowFlags(dlg.windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
     connect(&dlg, &NewTaskDialog::taskCreated, model, &TaskModel::addTask);
     dlg.exec();
+    emit updateTodayTimeElapsedNeeded();
 }
 
 void MainWindow::updateTimer()
@@ -277,6 +291,7 @@ void MainWindow::on_stopButton_clicked()
     ui->label->setHidden(true);
     ui->lineEdit->setHidden(true);
     ui->lineEdit->setText("0");
+    emit updateTodayTimeElapsedNeeded();
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -345,4 +360,9 @@ void MainWindow::on_actionPreferences_triggered()
     dlg.setWindowFlags(dlg.windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
     dlg.setWindowFlags(dlg.windowFlags() & ~Qt::WindowContextHelpButtonHint);
     dlg.exec();
+}
+
+void MainWindow::setTodayTimeElapsed(const QTime &time)
+{
+    ui->timeEditToday->setTime(time);
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>836</width>
     <height>600</height>
    </rect>
   </property>
@@ -75,7 +75,7 @@
       <item>
        <widget class="QLabel" name="todayLabel">
         <property name="text">
-         <string>Today:</string>
+         <string>Time elapsed for today's finished tasks:</string>
         </property>
        </widget>
       </item>
@@ -134,7 +134,7 @@
       <item>
        <widget class="QLabel" name="labelLastTask">
         <property name="text">
-         <string>Last task:</string>
+         <string>Time elapsed during last task:</string>
         </property>
        </widget>
       </item>
@@ -243,7 +243,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>836</width>
      <height>29</height>
     </rect>
    </property>

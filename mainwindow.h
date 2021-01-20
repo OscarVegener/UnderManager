@@ -12,12 +12,16 @@
 #include <QClipboard>
 #include <QSettings>
 #include <QMessageBox>
+#include <QThread>
+#include <QMutex>
+#include <QMutexLocker>
 #include "datedialog.h"
 #include "taskmodel.h"
 #include "taskfiltermodel.h"
 #include "aboutdialog.h"
 #include "newtaskdialog.h"
 #include "preferences.h"
+#include "updatetodaytimeworker.h"
 
 #include <QDebug>
 
@@ -72,11 +76,17 @@ private:
     void writeDefaultSettings();
     void readSettings();
 
+    QThread workerThread;
+    UpdateTodayTimeWorker *worker;
+    QMutex tasksMutex;
+
 signals:
     void selectedDateChanged();
+    void updateTodayTimeElapsedNeeded();
 
 private slots:
     void updateTimer();
+
     void on_startButton_clicked();
     void on_stopButton_clicked();
     void on_pushButton_clicked();
@@ -85,10 +95,14 @@ private slots:
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
     void on_tableView_customContextMenuRequested(const QPoint &pos);
+
     void deleteItem();
     void copyItem();
     void newItem();
+
     void on_actionPreferences_triggered();
+
+    void setTodayTimeElapsed(const QTime & time);
 };
 
 #endif // MAINWINDOW_H
