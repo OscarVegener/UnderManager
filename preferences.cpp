@@ -13,6 +13,12 @@ Preferences::Preferences(QSettings *settings, QWidget *parent) :
     else{
         ui->checkBox->setCheckState(Qt::Unchecked);
     }
+    if(settings->value("General/closeToTray").toBool()){
+        ui->checkBox_2->setCheckState(Qt::Checked);
+    }
+    else{
+        ui->checkBox_2->setCheckState(Qt::Unchecked);
+    }
 }
 
 Preferences::~Preferences()
@@ -27,10 +33,20 @@ void Preferences::on_pushButton_clicked()
 
 void Preferences::on_checkBox_stateChanged(int arg1)
 {
-    if (arg1 == Qt::Checked){
+    if(arg1 == Qt::Checked){
         settings->setValue("General/autoFinishTask", true);
     }
     else if(arg1 == Qt::Unchecked){
         settings->setValue("General/autoFinishTask", false);
+    }
+}
+
+void Preferences::on_checkBox_2_stateChanged(int arg1)
+{
+    if(arg1 == Qt::Checked){
+        settings->setValue("General/closeToTray", true);
+    }
+    else if(arg1 == Qt::Unchecked){
+        settings->setValue("General/closeToTray",  false);
     }
 }

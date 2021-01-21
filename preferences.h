@@ -24,6 +24,8 @@ private slots:
 
     void on_checkBox_stateChanged(int arg1);
 
+    void on_checkBox_2_stateChanged(int arg1);
+
 private:
     QSettings *settings;
 

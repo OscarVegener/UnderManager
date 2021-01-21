@@ -48,6 +48,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     initContextMenu();
 
+    initTrayContextMenu();
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setContextMenu(trayContextMenu);
+    trayIcon->setIcon(QIcon(":/new/icons/undermanager.ico"));
+    trayIcon->show();
+
     clipBoard = QGuiApplication::clipboard();
 
     readSettings();
@@ -64,8 +70,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    exit();
-    QMainWindow::closeEvent(event);
+    if (settings->value("General/closeToTray").toBool()){
+        event->ignore();
+        this->hide();
+    }
+    else{
+        exit();
+        QMainWindow::closeEvent(event);
+    }
 }
 
 void MainWindow::setDate(const QDate &date){
@@ -108,6 +120,7 @@ void MainWindow::writeSettings()
 
 void MainWindow::writeDefaultSettings()
 {
+    settings->setValue("VERSION", CURRENT_VERSION);
     settings->beginGroup("MainWindow");
     settings->setValue("size", size());
     settings->setValue("pos", pos());
@@ -122,12 +135,13 @@ void MainWindow::writeDefaultSettings()
     settings->setValue("timeElapsed", ui->timeEdit->time());
     settings->setValue("daysElapsed", ui->lineEdit->text());
     settings->setValue("autoFinishTask", true);
+    settings->setValue("closeToTray", true);
     settings->endGroup();
 }
 
 void MainWindow::readSettings()
 {
-    if (QFile::exists(settings->fileName())){
+    if (QFile::exists(settings->fileName()) && settings->value("VERSION").toInt() == CURRENT_VERSION){
         settings->beginGroup("MainWindow");
         resize(settings->value("size", QSize(400, 400)).toSize());
         move(settings->value("pos", QPoint(200, 200)).toPoint());
@@ -141,6 +155,17 @@ void MainWindow::readSettings()
     else{
         writeDefaultSettings();
     }
+}
+
+void MainWindow::initTrayContextMenu()
+{
+    trayContextMenu = new QMenu(this);
+    showAction = new QAction(tr("&Show"), trayContextMenu);
+    connect(showAction, &QAction::triggered, this, &MainWindow::trayShow);
+    trayContextMenu->addAction(showAction);
+    closeAction = new QAction(tr("&Exit"), trayContextMenu);
+    connect(closeAction, &QAction::triggered, this, &MainWindow::on_actionExit_triggered);
+    trayContextMenu->addAction(closeAction);
 }
 
 void MainWindow::addNewTask()
@@ -365,4 +390,9 @@ void MainWindow::on_actionPreferences_triggered()
 void MainWindow::setTodayTimeElapsed(const QTime &time)
 {
     ui->timeEditToday->setTime(time);
+}
+
+void MainWindow::trayShow()
+{
+    this->showNormal();
 }

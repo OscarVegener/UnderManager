@@ -15,6 +15,8 @@
 #include <QThread>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QSystemTrayIcon>
+#include <QCloseEvent>
 #include "datedialog.h"
 #include "taskmodel.h"
 #include "taskfiltermodel.h"
@@ -22,6 +24,8 @@
 #include "newtaskdialog.h"
 #include "preferences.h"
 #include "updatetodaytimeworker.h"
+
+#define CURRENT_VERSION 210
 
 #include <QDebug>
 
@@ -40,6 +44,7 @@ public:
     void closeEvent(QCloseEvent *event) override;
 
 public slots:
+    //Sets date that is used to display tasks
     void setDate(const QDate& date);
 
 private:
@@ -53,40 +58,58 @@ private:
 
     QString filename = "tasks.dat";
 
+    //Functions to create tasks with standard start/stop mechanism
     void addNewTask();
     void finishTask();
 
+    //File load/save related functions
     void save(const QString &path);
     void load(const QString &path);
     void loadUnfinishedTask();
     void deleteUnfinishedTask();
 
+    //Function to call when exit
+    //This function handles saving of tasks and settings
     void exit();
 
+    //Context menu for TableView
     QMenu *contextMenu;
     QAction *deleteAction;
     QAction *copyAction;
     QAction *newTaskAction;
     void initContextMenu();
 
+    //Clipboard
     QClipboard *clipBoard;
 
+    //Settings
     QSettings *settings;
     void writeSettings();
     void writeDefaultSettings();
     void readSettings();
 
+    //Thread for calculating time elapsed for today's finished tasks
     QThread workerThread;
     UpdateTodayTimeWorker *worker;
+    //Mutex to lock when tasks is loading from file
     QMutex tasksMutex;
 
+    //System tray
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayContextMenu;
+    QAction *closeAction;
+    QAction *showAction;
+    void initTrayContextMenu();
+
 signals:
-    void selectedDateChanged();
+    //Signal to emit when need to update total time elapsed for today's finished tasks
     void updateTodayTimeElapsedNeeded();
 
 private slots:
+    //Slot to update time elapsed and days elapsed in ui
     void updateTimer();
 
+    //auto slots
     void on_startButton_clicked();
     void on_stopButton_clicked();
     void on_pushButton_clicked();
@@ -95,14 +118,19 @@ private slots:
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
     void on_tableView_customContextMenuRequested(const QPoint &pos);
+    void on_actionPreferences_triggered();
 
+    //slots for TableView context menu
     void deleteItem();
     void copyItem();
     void newItem();
 
-    void on_actionPreferences_triggered();
-
+    //slot that updates total time elapsed for today's finished tasks in ui
     void setTodayTimeElapsed(const QTime & time);
+
+    //slots for tray context menu
+    void trayShow();
+
 };
 
 #endif // MAINWINDOW_H

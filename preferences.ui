@@ -28,18 +28,31 @@
       <attribute name="title">
        <string>General</string>
       </attribute>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QWidget" name="">
        <property name="geometry">
         <rect>
          <x>20</x>
          <y>20</y>
-         <width>295</width>
-         <height>25</height>
+         <width>297</width>
+         <height>81</height>
         </rect>
        </property>
-       <property name="text">
-        <string>Automatically finish last task on exit</string>
-       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QCheckBox" name="checkBox">
+          <property name="text">
+           <string>Automatically finish last task on exit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_2">
+          <property name="text">
+           <string>Close program to tray</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </widget>
