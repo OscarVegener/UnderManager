@@ -245,8 +245,10 @@ void MainWindow::deleteUnfinishedTask()
 void MainWindow::exit()
 {
     if (settings->value("General/autoFinishTask").toBool()){
-        if (!filterModel->data(filterModel->index(0, 3), Qt::DisplayRole).toDateTime().isValid()){
-            finishTask();
+        if (!tasks.isEmpty()){
+            if (!filterModel->data(filterModel->index(0, 3), Qt::DisplayRole).toDateTime().isValid()){
+                finishTask();
+            }
         }
     }
     if (QFile::exists(settings->fileName())){
