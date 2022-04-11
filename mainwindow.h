@@ -100,7 +100,6 @@ private:
     QAction *closeAction;
     QAction *showAction;
     void initTrayContextMenu();
-
 signals:
     //Signal to emit when need to update total time elapsed for today's finished tasks
     void updateTodayTimeElapsedNeeded();

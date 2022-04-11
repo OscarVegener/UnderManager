@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    qDebug() << "Creating window";
     ui->setupUi(this);
 
     // construct objects
@@ -72,7 +73,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (settings->value("General/closeToTray").toBool()){
         event->ignore();
-        this->hide();
+        //this->hide(); # Does not follow guidelines, user does not expect such behaviour
+        QMainWindow::setWindowState(Qt::WindowMinimized);
     }
     else{
         exit();
@@ -160,6 +162,7 @@ void MainWindow::readSettings()
 void MainWindow::initTrayContextMenu()
 {
     trayContextMenu = new QMenu(this);
+
     showAction = new QAction(tr("&Show"), trayContextMenu);
     connect(showAction, &QAction::triggered, this, &MainWindow::trayShow);
     trayContextMenu->addAction(showAction);
@@ -244,6 +247,7 @@ void MainWindow::deleteUnfinishedTask()
 
 void MainWindow::exit()
 {
+    qDebug() << "exit() has been called; saving tasks and settings...";
     if (settings->value("General/autoFinishTask").toBool()){
         if (!tasks.isEmpty()){
             if (!filterModel->data(filterModel->index(0, 3), Qt::DisplayRole).toDateTime().isValid()){
@@ -258,6 +262,7 @@ void MainWindow::exit()
         writeDefaultSettings();
     }
     save(filename);
+    qDebug() << "Saved tasks and settings.";
 }
 
 void MainWindow::deleteItem()
@@ -349,7 +354,9 @@ void MainWindow::on_actionSave_as_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
+    qDebug() << "Calling exit() func";
     exit();
+    qDebug() << "Handling exit";
     QApplication::exit(0);
 }
 
@@ -396,5 +403,6 @@ void MainWindow::setTodayTimeElapsed(const QTime &time)
 
 void MainWindow::trayShow()
 {
+    this->raise();
     this->showNormal();
 }
